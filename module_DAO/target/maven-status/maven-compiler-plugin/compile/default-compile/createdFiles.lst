@@ -1,0 +1,9 @@
+database\util\GenericDAO.class
+database\util\Pagination.class
+database\annotation\Table.class
+model\Client.class
+model\Main.class
+database\service\Service.class
+database\annotation\Column.class
+database\access\Postgres.class
+database\annotation\AnnotationCheker.class

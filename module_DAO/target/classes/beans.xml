@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="Service" class="database.service.Service" >
+        <property name="conn" ref="postgres"/>
+        <property name="pagination" ref="pagination"/>
+    </bean>
+    <bean id="postgres" class="database.access.Postgres" >
+        <property name="username" value="postgres" />
+        <property name="password" value="postgres" />
+        <property name="databaseName" value="holiday_project" />
+    </bean>
+    
+    <bean id="pagination" class="database.util.Pagination">
+        <property name="moteurSQL" value="${pagination.moteurSQL}" />
+        <property name="nombre_pagination" value="${pagination.nombre_pagination}" />
+    </bean>
+
+    <!--  READ .properties FILE  -->
+    <bean id="appProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+        <property name="singleton" value="true"/>
+        <property name="ignoreResourceNotFound" value="true"/>
+        <property name="locations">
+            <list>
+                <value>classpath*:application.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="placeholderConfig" class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
+        <property name="properties" ref="appProperties" />
+    </bean>
+    <!--  READ .properties FILE  -->
+    
+</beans>
