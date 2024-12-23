@@ -21,13 +21,13 @@ public class Main {
             ApplicationContext context = new ClassPathXmlApplicationContext("beans.xml");
 
             Client client1 = new Client(1, null, null, null);
-            Client client2 = new Client(3, null, null, null);
+            Client client2 = new Client(4, null, null, null);
 
             Service obj = (Service) context.getBean("Service");
-            List<Client> valiny=obj.getByCriteria(client2, null);
-            for (Client client : valiny) {
-                System.out.println(client.getNom());
-            }
+            obj.delete(client2);
+            //for (Client client : valiny) {
+            //    System.out.println(client.getNom());
+            //}
             //Client client=new Client("aaaa", "bbbbbbb", "azerty");
             //List<Client> clients=obj.getAll(Client.class, "2");
             //for (Client client1 : clients) {

@@ -22,6 +22,7 @@ import database.util.Pagination;
  * @author Andra
  */
 public class Service {
+
     private Postgres conn;
     private Pagination pagination;
 
@@ -40,7 +41,6 @@ public class Service {
     public void setPagination(Pagination pagination) {
         this.pagination = pagination;
     }
-    
 
     //yes
     public void insert(Object obj, Connection conn) throws Exception {
@@ -356,18 +356,82 @@ public class Service {
 
     public <T> List<T> getListBetween(Object min, Object max, String offset) throws Exception {
         List<T> resuList = null;
-        Connection conn=getConn().getConnection();
-        
+        Connection conn = getConn().getConnection();
+
         try {
-           resuList=getListBetween(min, max, offset, conn);
+            resuList = getListBetween(min, max, offset, conn);
         } catch (Exception e) {
             throw e;
         } finally {
-            if(conn != null){
+            if (conn != null) {
                 conn.close();
             }
         }
         return resuList;
+    }
+
+    public void delete(Object obj, Connection conn) throws Exception {
+        try {
+            // Get annotations for the object
+            AnnotationCheker annot = AnnotationCheker.getAnnotationCriteria(obj);
+
+            String table = annot.getTableName();
+            Map<String, Object> columns = annot.getColumnNames();
+
+            if (columns.isEmpty()) {
+                throw new Exception("Primary key information is required for deletion.");
+            }
+
+            String whereClause = String.join(" AND ",
+                    columns.keySet().stream().map(key -> key + " = ?").toArray(String[]::new));
+
+            String query = "DELETE FROM " + table + " WHERE " + whereClause;
+
+            PreparedStatement stmt = null;
+            try {
+                stmt = conn.prepareStatement(query);
+                conn.setAutoCommit(false);
+
+                int parameterIndex = 1;
+                for (Object paramValue : columns.values()) {
+                    if (paramValue instanceof Timestamp) {
+                        stmt.setTimestamp(parameterIndex, (Timestamp) paramValue);
+                    } else {
+                        stmt.setObject(parameterIndex, paramValue);
+                    }
+                    parameterIndex++;
+                }
+                int rowsAffected = stmt.executeUpdate();
+
+                // Commit the transaction if successful
+                conn.commit();
+            } finally {
+                if (stmt != null) {
+                    stmt.close();
+                }
+            }
+        } catch (Exception e) {
+            if (conn != null) {
+                conn.rollback();
+            }
+            throw e;
+        }
+    }
+
+    public void delete(Object obj) throws Exception {
+        Connection conn = getConn().getConnection();
+        try {
+            delete(obj, conn);
+        } catch (Exception e) {
+            if (conn != null) {
+                conn.rollback();
+            }
+            throw e;
+        } finally {
+            if (conn != null) {
+                conn.close();
+            }
+        }
     }
 
 }
